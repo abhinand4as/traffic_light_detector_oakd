@@ -17,8 +17,12 @@ Spatial Tiny-yolo example
 '''
 
 red = LED(4)
-green = LED(2)
-yellow = LED(3)
+green = LED(3)
+yellow = LED(14)
+
+#bMotor = LED(4)
+
+
 
 # tiny yolo v3/4 label texts
 labelMap = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
@@ -135,8 +139,15 @@ with dai.Device(pipeline) as device:
     green_lower = np.array([50, 100, 100], np.uint8) 
     green_upper = np.array([70, 255, 255], np.uint8)
 
-    yellow_lower = np.array([26, 187, 174], np.uint8) 
-    yellow_upper = np.array([46, 207, 254], np.uint8) 
+    #yellow_lower = np.array([26, 187, 174], np.uint8) 
+    #yellow_upper = np.array([46, 207, 254], np.uint8)
+    
+    #yellow_lower = np.array([26, 160, 162], np.uint8) 
+    #yellow_upper = np.array([46, 180, 242], np.uint8)
+    
+    yellow_lower = np.array([25, 200, 103], np.uint8) 
+    yellow_upper = np.array([45, 220, 183], np.uint8)
+    
     ###################################################
 
     while True:
@@ -144,7 +155,7 @@ with dai.Device(pipeline) as device:
         red.off()
         green.off()
         yellow.off()
-
+        #bMotor.on()
         inPreview = previewQueue.get()
         inNN = detectionNNQueue.get()
         depth = depthQueue.get()
@@ -241,8 +252,12 @@ with dai.Device(pipeline) as device:
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
                                     (0, 0, 255), 2)     
                         print("Traffic Light: RED")
+                        
+                        #VIBRATION
                         red.on()
-                        #green.on()
+                        green.on()
+                        yellow.on()
+                        sleep(0.1)
 
                 # Creating contour to track green color 
                 contours, hierarchy = cv2.findContours(green_mask, 
@@ -262,8 +277,11 @@ with dai.Device(pipeline) as device:
                                     (0, 255, 0), 2)  
                         print("Traffic Light: GREEN")
 
-                        #red.on()
+                        #VIBRATION
+                        green.off()
                         green.on()
+                        sleep(.1)
+
 
                 # Creating contour to track yellow color 
                 contours, hierarchy = cv2.findContours(yellow_mask, 
@@ -283,8 +301,11 @@ with dai.Device(pipeline) as device:
                                     (0, 255, 255), 2)  
                         print("Traffic Light: YELLOW")
 
+                        #VIBRATION
                         yellow.on()
-
+                        green.on()
+                        sleep(0.05)
+                        
                 #######################################################################
             cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
@@ -300,3 +321,4 @@ with dai.Device(pipeline) as device:
 
         if cv2.waitKey(1) == ord('q'):
             break
+
